@@ -59,7 +59,16 @@ public class DataWriter {
 	
 	public void NewChat(String chat) throws SQLException{
 		Statement stmt = connection.createStatement();
-		String query = "INSERT INTO Content (chat) VALUES ('"+chat+"');";		
+		String id = chat.substring(0, chat.indexOf(':'));
+		String query = "INSERT INTO Content (chat,id) VALUES ('"+chat+"','"+id+"');";		
 		stmt.executeUpdate(query);	
+	}
+	
+	public void ReceivedAdd(String id, int idx) throws SQLException{
+		Statement stmt = connection.createStatement();
+		String qid = "//";
+		qid = qid.concat(id);
+		String query = "UPDATE Content set id=id||'"+qid+"' where idx='"+idx+"';";
+		stmt.executeUpdate(query);
 	}
 }

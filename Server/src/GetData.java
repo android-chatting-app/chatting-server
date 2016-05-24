@@ -2,6 +2,7 @@
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,7 +23,6 @@ public class GetData extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String id = null, pw = null, act = null;
-		System.out.println("get process");
 		if(request.getParameter("act").equals("login")){
 			System.out.println("login process");
 			id = request.getParameter("id");
@@ -64,9 +64,9 @@ public class GetData extends HttpServlet {
 			}
 		}
 		else if(request.getParameter("act").equals("send")){
-			System.out.println("send process");
 			String sendChat = request.getParameter("chat");
-			DataWriter writer = new DataWriter("C:/database/chat.db");
+			System.out.println(sendChat);
+			DataWriter writer = new DataWriter("C:/database/chat2.db");
 			
 			writer.open();
 			try {
@@ -74,38 +74,31 @@ public class GetData extends HttpServlet {
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				writer.close();
 			}
 			writer.close();
 			
 		}
 		else if(request.getParameter("act").equals("syn")){
-			System.out.println("syn process");
-			int serverIdx = 0, clientIdx;
-			DataReader reader = new DataReader("C:/database/chat.db");
+			String clienetID = request.getParameter("id");
+			DataReader reader = new DataReader("C:/database/chat2.db");
+			HashMap<String, String> chat;
 			reader.open();
-			try {
-				serverIdx = reader.NewChatCheck();		
-				clientIdx = Integer.parseInt(request.getParameter("idx"));
-				System.out.println("serverIdx="+serverIdx+", clientIdx="+clientIdx);
-				if(clientIdx == -1){
-					System.out.println("Init syn process");
-					System.out.println(serverIdx);
-					response.getWriter().append(Integer.toString(serverIdx));
-				}
-				else if(clientIdx == serverIdx)
-					response.getWriter().append("0");
-				else{
-					response.getWriter().append(Integer.toString(serverIdx-clientIdx));
-					for(clientIdx++; clientIdx<=serverIdx; clientIdx++){
-						response.getWriter().append(reader.SynNewChat(clientIdx));
-					}
-				}
-			}catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			try{
+				if(reader.ReceivedCheck(clienetID) != null){
+					chat = reader.ReceivedCheck(clienetID);
+					reader.close();
+					DataWriter writer = new DataWriter("C:/database/chat2.db");
+					writer.open();
+					writer.ReceivedAdd(clienetID, Integer.parseInt(chat.get("idx")));
+					writer.close();
+					response.getWriter().append(chat.get("chat"));
+				}else
+					response.getWriter().append(null);
+			}catch(Exception ex){
+				ex.printStackTrace();
+				reader.close();
 			}
-			reader.close();
-			
 		}
 	}
 

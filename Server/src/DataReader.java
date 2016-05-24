@@ -69,13 +69,28 @@ public class DataReader {
 			return false;
 		else
 			return true;
+	}
+	
+	public HashMap<String, String> ReceivedCheck(String id) throws SQLException{
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT * from Content");
+		String chat = null;
+		int idx = 0;
+		HashMap<String, String> hash = new HashMap<String, String>();
 		
-		/*while(rs.next()){
-			if(pw.equals(rs.getString("pw"))){
-				return true;
+		while(rs.next()){
+			if(!rs.getString("id").contains(id)){
+				chat = rs.getString("chat");
+				idx = rs.getInt("idx");			
+				
+				hash.put("chat", chat); 
+				hash.put("idx", Integer.toString(idx));
+				
+				return hash;
 			}
 		}
-		return false;*/
+		
+		return null;
 	}
 	
 	public boolean RegistCheck(String id) throws SQLException{
